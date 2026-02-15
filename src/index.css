@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+
+body {
+  font-family: 'Lexend Deca', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Override browser autofill styles */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  -webkit-text-fill-color: #1f2937 !important;
+  font-family: 'Lexend Deca', sans-serif !important;
+}
+
+/* Enhanced input styling */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  font-family: 'Lexend Deca', sans-serif !important;
+  font-size: 0.95rem !important;
+}
+
+/* Remove default input styling */
+input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}

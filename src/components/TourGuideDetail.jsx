@@ -86,6 +86,20 @@ const guideDetails = {
     rating: 4.8,
     reviews: 178,
     specialties: ["Historical Tours", "Royal Heritage", "Literary Tours", "Countryside"]
+  },
+  7: {
+    id: 7,
+    name: "Dzaky Aziz",
+    country: "United Kingdom",
+    pricePerHour: 220000,
+    image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=400&h=400&fit=crop&crop=face",
+    description: "Hello! I'm Emma, your knowledgeable British guide with a love for sharing the rich heritage and diverse landscapes of the UK. From royal palaces in London to the rugged Highlands of Scotland, I'll help you discover the stories, traditions, and hidden corners of Britain. Let's make your British adventure truly special!",
+    languages: ["English", "French", "German"],
+    experience: "9 years",
+    tours: 412,
+    rating: 4.8,
+    reviews: 178,
+    specialties: ["Historical Tours", "Royal Heritage", "Literary Tours", "Countryside"]
   }
 };
 

@@ -37,6 +37,13 @@ const dummyGuides = [
     country: "United Kingdom",
     pricePerHour: 220000,
     image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=400&h=400&fit=crop&crop=face"
+  },
+  {
+    id: 7,
+    name: "Dzaky Aziz",
+    country: "United Kingdom",
+    pricePerHour: 220000,
+    image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=400&h=400&fit=crop&crop=face"
   }
 ];
 

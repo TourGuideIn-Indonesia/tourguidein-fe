@@ -1,32 +1,33 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axiosPrivate from '../api/axiosPrivate';
+import { useSearchParams } from 'react-router-dom';
 
 export default function TourGuideList() {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [guides, setGuides] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const countryId = searchParams.get('country_id');
+  const cityId = searchParams.get('city_id');
+  const date = searchParams.get('date');
   useEffect(() => {
-    const controller = new AbortController();
-    
-    fetchGuides(controller.signal);
-    
-    return () => {
-      controller.abort();
-    };
-  }, []);
+    if (!countryId || !cityId) return;
+
+    fetchGuides();
+  }, [countryId, cityId, date]);
 
   const fetchGuides = async (signal) => {
     try {
       const response = await axiosPrivate.get('/api/local-guides', {
         params: {
-          country_id: 20,
-          city_id: 28
+          country_id: countryId,
+          city_id: cityId,
+          date: date
         },
         signal
       });
-      // Map Laravel API response to frontend format
+
       const mappedGuides = response.data.data.map(guide => ({
         id: guide.id,
         name: guide.basic_info.name,
@@ -35,9 +36,12 @@ export default function TourGuideList() {
         image: guide.basic_info.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
         isNewGuide: guide.profile?.is_new_guide || false
       }));
+
       setGuides(mappedGuides);
     } catch (error) {
-      console.error('Error fetching guides:', error);
+      if (error.name !== 'CanceledError') {
+        console.error('Error fetching guides:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -131,7 +135,7 @@ export default function TourGuideList() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                  
+
                   {/* Online Status Badge */}
                   {guide.isNewGuide && (
                     <div className="absolute top-4 right-4">

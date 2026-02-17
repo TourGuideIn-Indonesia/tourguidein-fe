@@ -11,7 +11,13 @@ import TourGuideDetail from './components/TourGuideDetail'
 import CheckAvailability from './components/CheckAvailability'
 import Checkout from './components/Checkout'
 import ChatPage from './components/ChatPage';
+import { useEffect } from 'react';
+
 function App() {
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    console.log('Current token:', token);
+  }, []);
   return (
     <BrowserRouter>
       <Layout>

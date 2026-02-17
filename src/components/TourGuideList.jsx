@@ -200,9 +200,13 @@ export default function TourGuideList() {
                       <p className="text-sm text-gray-500">Price per hour</p>
                       <p className="text-2xl font-bold text-blue-600">{formatPrice(guide.pricePerHour)}</p>
                     </div>
-                    <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    <Link
+                      to={`/guides/${guide.id}`}
+                      className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium inline-block text-center"
+                    >
                       View Details
-                    </button>
+                    </Link>
+
                   </div>
                 </div>
               </div>

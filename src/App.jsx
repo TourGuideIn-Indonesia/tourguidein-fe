@@ -2,7 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import Home from './components/Home'
 import Messages from './components/Messages'
-import Bookings from './components/Bookings'
+import Bookings from './components/Booking'
+import BookingDetail from './components/BookingDetail'
 import Profile from './components/Profile'
 import TravellerRegister from './components/TravellerRegister'
 import TravellerLogin from './components/TravellerLogin'
@@ -26,8 +27,9 @@ function App() {
           <Route path="/register" element={<TravellerRegister />} />
           <Route path="/traveller/login" element={<TravellerLogin />} />
           <Route path="/messages" element={<Messages />} />
-          <Route path="/bookings" element={<Bookings />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/bookings" element={<Bookings />} />
+          <Route path="/bookings/:id" element={<BookingDetail />} />
           <Route path="/guides" element={<TourGuideList />} />
           <Route path="/guides/:id" element={<TourGuideDetail />} />
           <Route path="/guides/:id/availability" element={<CheckAvailability />} />

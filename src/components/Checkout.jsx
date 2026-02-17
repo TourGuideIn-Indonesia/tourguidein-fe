@@ -11,9 +11,6 @@ export default function Checkout() {
   const [guide, setGuide] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // =============================
-  // LOAD BOOKING DATA
-  // =============================
   useEffect(() => {
     const stored = localStorage.getItem("bookingData");
 
@@ -35,9 +32,6 @@ export default function Checkout() {
     calculateCheckout(parsed);
   }, [id]);
 
-  // =============================
-  // FETCH GUIDE DETAIL
-  // =============================
   const fetchGuide = async () => {
     try {
       const res = await axiosPrivate.get(`/api/local-guides/${id}`);
@@ -47,9 +41,6 @@ export default function Checkout() {
     }
   };
 
-  // =============================
-  // CALCULATE CHECKOUT
-  // =============================
   const calculateCheckout = async (data) => {
     try {
       const response = await axiosPrivate.post(
@@ -60,14 +51,19 @@ export default function Checkout() {
           end_date: data.endDate,
           apply_same_hour: false,
           same_hour: null,
-          daily_hours: data.scheduledDays.map((d) =>
-            parseInt(d.duration)
+          daily_hours: Object.fromEntries(
+            data.scheduledDays.map((d) => [
+              d.date,
+              parseInt(d.duration)
+            ])
           ),
           starting_location: data.startingLocation ?? "Meeting Point",
-          ending_location: data.endingLocation ?? "City Center",
+          end_location: data.endingLocation ?? "City Center",
           promo_code: null,
         }
       );
+
+      console.log(response.data)
 
       setCheckoutData(response.data);
     } catch (err) {
@@ -77,9 +73,6 @@ export default function Checkout() {
     }
   };
 
-  // =============================
-  // CREATE BOOKING
-  // =============================
   const [submitting, setSubmitting] = useState(false);
 
   const handleSendMessage = async () => {
@@ -96,14 +89,21 @@ export default function Checkout() {
         apply_same_hour: false,
         same_hour: null,
 
-        daily_hours: bookingData.scheduledDays.map((d) =>
-          parseInt(d.duration)
+        daily_hours: Object.fromEntries(
+          bookingData.scheduledDays.map((d) => [
+            d.date,
+            {
+              duration: parseInt(d.duration),
+              start_time: d.startTime,
+            },
+          ])
         ),
+
 
         starting_location:
           bookingData.startingLocation ?? "Meeting Point",
 
-        ending_location:
+        end_location:
           bookingData.endingLocation ?? "City Center",
 
         promo_code: null,
@@ -114,7 +114,7 @@ export default function Checkout() {
       localStorage.removeItem("bookingData");
 
       // Redirect ke chat atau booking detail
-      navigate(`/booking/${response.data.order_id}`);
+      navigate(`/bookings/${response.data.order_id}`);
 
     } catch (err) {
       console.error(err.response?.data);
@@ -205,7 +205,7 @@ export default function Checkout() {
                     </div>
 
                     <div className="text-lg font-bold">
-                      {formatPrice(day.total)}
+                      {formatPrice(day.amount)}
                     </div>
                   </div>
                 </div>
@@ -232,13 +232,19 @@ export default function Checkout() {
 
               <div className="flex justify-between">
                 <span>Application Fee</span>
-                <span>{formatPrice(checkoutData.summary.application_fee)}</span>
+                <span>{formatPrice(checkoutData.pricing.application_fee)}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Tax</span>
+                <span>{formatPrice(checkoutData.pricing.amount_for_tax)}</span>
               </div>
 
               <div className="border-t pt-3 flex justify-between text-xl font-bold text-blue-600">
                 <span>Total</span>
-                <span>{formatPrice(checkoutData.summary.total)}</span>
+                <span>{formatPrice(checkoutData.pricing.amount_paid_by_traveller)}</span>
               </div>
+
             </div>
 
             {/* NOTICE */}

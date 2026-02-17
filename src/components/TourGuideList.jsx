@@ -1,56 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-
-// Dummy data for tour guides
-const dummyGuides = [
-  {
-    id: 1,
-    name: "Budi Santoso",
-    country: "Indonesia",
-    pricePerHour: 150000,
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face"
-  },
-  {
-    id: 3,
-    name: "Yuki Tanaka",
-    country: "Japan",
-    pricePerHour: 200000,
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face"
-  },
-  {
-    id: 4,
-    name: "Maria Rodriguez",
-    country: "Spain",
-    pricePerHour: 180000,
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face"
-  },
-  {
-    id: 5,
-    name: "Ahmed Hassan",
-    country: "Egypt",
-    pricePerHour: 120000,
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face"
-  },
-  {
-    id: 6,
-    name: "Emma Wilson",
-    country: "United Kingdom",
-    pricePerHour: 220000,
-    image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=400&h=400&fit=crop&crop=face"
-  },
-  {
-    id: 7,
-    name: "Dzaky Aziz",
-    country: "United Kingdom",
-    pricePerHour: 220000,
-    image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=400&h=400&fit=crop&crop=face"
-  }
-];
+import axiosPrivate from '../api/axiosPrivate';
 
 export default function TourGuideList() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [guides, setGuides] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredGuides = dummyGuides.filter(guide =>
+  useEffect(() => {
+    const controller = new AbortController();
+    
+    fetchGuides(controller.signal);
+    
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  const fetchGuides = async (signal) => {
+    try {
+      const response = await axiosPrivate.get('/api/local-guides', {
+        params: {
+          country_id: 20,
+          city_id: 28
+        },
+        signal
+      });
+      // Map Laravel API response to frontend format
+      const mappedGuides = response.data.data.map(guide => ({
+        id: guide.id,
+        name: guide.basic_info.name,
+        country: guide.location.country || 'Unknown',
+        pricePerHour: guide.profile?.hourly_fee || 0,
+        image: guide.basic_info.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
+        isNewGuide: guide.profile?.is_new_guide || false
+      }));
+      setGuides(mappedGuides);
+    } catch (error) {
+      console.error('Error fetching guides:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredGuides = guides.filter(guide =>
     guide.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     guide.country.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -63,6 +56,17 @@ export default function TourGuideList() {
       maximumFractionDigits: 0
     }).format(price);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading tour guides...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -129,12 +133,14 @@ export default function TourGuideList() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                   
                   {/* Online Status Badge */}
-                  <div className="absolute top-4 right-4">
-                    <div className="flex items-center bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                      <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse" />
-                      Available
+                  {guide.isNewGuide && (
+                    <div className="absolute top-4 right-4">
+                      <div className="flex items-center bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse" />
+                        New Guide
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Guide Info */}

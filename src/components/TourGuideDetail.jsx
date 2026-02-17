@@ -1,111 +1,68 @@
 import { useParams, Link } from 'react-router-dom'
-import { useState } from 'react'
-
-// Extended dummy data with descriptions
-const guideDetails = {
-  1: {
-    id: 1,
-    name: "Budi Santoso",
-    country: "Indonesia",
-    pricePerHour: 150000,
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
-    description: "Hello! I'm Budi, a passionate local guide with over 8 years of experience showing travelers the hidden gems of Indonesia. I specialize in cultural tours, adventure activities, and culinary experiences across Java, Bali, and beyond. Let me help you discover the authentic Indonesia that most tourists never get to see!",
-    languages: ["Indonesian", "English", "Javanese"],
-    experience: "8 years",
-    tours: 342,
-    rating: 4.8,
-    reviews: 124,
-    specialties: ["Cultural Tours", "Adventure", "Culinary", "Photography"]
-  },
-  2: {
-    id: 2,
-    name: "Sarah Johnson",
-    country: "United States",
-    pricePerHour: 250000,
-    image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face",
-    description: "Hi there! I'm Sarah, your friendly American guide with a passion for sharing the rich history and diverse culture of the United States. From the bustling streets of New York to the serene landscapes of national parks, I'll make your American adventure unforgettable. I love customizing tours to match your interests and pace!",
-    languages: ["English", "Spanish", "French"],
-    experience: "6 years",
-    tours: 289,
-    rating: 4.9,
-    reviews: 167,
-    specialties: ["Historical Tours", "City Tours", "Nature", "Photography"]
-  },
-  3: {
-    id: 3,
-    name: "Yuki Tanaka",
-    country: "Japan",
-    pricePerHour: 200000,
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face",
-    description: "Konnichiwa! I'm Yuki, and I'd love to be your guide to the wonders of Japan. With deep knowledge of both traditional and modern Japanese culture, I can help you experience everything from ancient temples to cutting-edge technology. Let me show you the harmony of old and new that makes Japan so special!",
-    languages: ["Japanese", "English", "Mandarin"],
-    experience: "10 years",
-    tours: 456,
-    rating: 4.9,
-    reviews: 203,
-    specialties: ["Cultural Tours", "Temples & Shrines", "Food Tours", "Technology"]
-  },
-  4: {
-    id: 4,
-    name: "Maria Rodriguez",
-    country: "Spain",
-    pricePerHour: 180000,
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
-    description: "¡Hola! I'm Maria, your enthusiastic Spanish guide ready to share the passion, art, and flavor of Spain. Whether you want to explore Gaudí's Barcelona, walk the ancient streets of Madrid, or taste authentic tapas in Seville, I'll make your Spanish journey vibrant and memorable. Vamos a explorar España juntos!",
-    languages: ["Spanish", "English", "Catalan"],
-    experience: "7 years",
-    tours: 378,
-    rating: 4.8,
-    reviews: 145,
-    specialties: ["Art & Architecture", "Food & Wine", "Flamenco", "City Tours"]
-  },
-  5: {
-    id: 5,
-    name: "Ahmed Hassan",
-    country: "Egypt",
-    pricePerHour: 120000,
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face",
-    description: "Welcome! I'm Ahmed, your gateway to the mysteries and wonders of ancient Egypt. As a certified Egyptologist, I can bring the stories of pharaohs, pyramids, and hieroglyphs to life. Let me guide you through 5,000 years of history, from the Great Pyramids to the treasures of the Valley of the Kings.",
-    languages: ["Arabic", "English", "French"],
-    experience: "12 years",
-    tours: 523,
-    rating: 4.9,
-    reviews: 289,
-    specialties: ["Ancient History", "Archaeology", "Desert Tours", "Photography"]
-  },
-  6: {
-    id: 6,
-    name: "Emma Wilson",
-    country: "United Kingdom",
-    pricePerHour: 220000,
-    image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=400&h=400&fit=crop&crop=face",
-    description: "Hello! I'm Emma, your knowledgeable British guide with a love for sharing the rich heritage and diverse landscapes of the UK. From royal palaces in London to the rugged Highlands of Scotland, I'll help you discover the stories, traditions, and hidden corners of Britain. Let's make your British adventure truly special!",
-    languages: ["English", "French", "German"],
-    experience: "9 years",
-    tours: 412,
-    rating: 4.8,
-    reviews: 178,
-    specialties: ["Historical Tours", "Royal Heritage", "Literary Tours", "Countryside"]
-  },
-  7: {
-    id: 7,
-    name: "Dzaky Aziz",
-    country: "United Kingdom",
-    pricePerHour: 220000,
-    image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=400&h=400&fit=crop&crop=face",
-    description: "Hello! I'm Emma, your knowledgeable British guide with a love for sharing the rich heritage and diverse landscapes of the UK. From royal palaces in London to the rugged Highlands of Scotland, I'll help you discover the stories, traditions, and hidden corners of Britain. Let's make your British adventure truly special!",
-    languages: ["English", "French", "German"],
-    experience: "9 years",
-    tours: 412,
-    rating: 4.8,
-    reviews: 178,
-    specialties: ["Historical Tours", "Royal Heritage", "Literary Tours", "Countryside"]
-  }
-};
+import { useState, useEffect } from 'react'
+import axiosPrivate from '../api/axiosPrivate'
 
 export default function TourGuideDetail() {
   const { id } = useParams();
-  const guide = guideDetails[id];
+  const [guide, setGuide] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    
+    fetchGuide(controller.signal);
+    
+    return () => {
+      controller.abort();
+    };
+  }, [id]);
+
+  const fetchGuide = async (signal) => {
+    try {
+      const response = await axiosPrivate.get(`/api/local-guides/${id}`, {
+        signal
+      });
+      
+      const guideData = response.data.data;
+      
+      // Map Laravel API response to frontend format
+      const mappedGuide = {
+        id: guideData.id,
+        name: guideData.name,
+        country: guideData.base_in?.country || 'Unknown',
+        city: guideData.base_in?.city || 'Unknown',
+        image: guideData.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
+        description: guideData.description || 'No description available',
+        languages: guideData.i_speak || [],
+        rating: guideData.reviews?.average || 0,
+        reviews: guideData.reviews?.total || 0,
+        specialties: guideData.interests?.map(interest => interest.name) || [],
+        verifiedBy: guideData.verified_by || [],
+        coverageArea: guideData.coverage_area?.map(city => city.name) || [],
+        itineraries: guideData.usual_itineraries || [],
+        otherReviews: guideData.other_reviews || [],
+        hourlyFee: guideData.hourly_fee || 0,
+        dailyFee: guideData.daily_fee || 0
+      };
+      
+      setGuide(mappedGuide);
+    } catch (error) {
+      console.error('Error fetching guide details:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading guide details...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!guide) {
     return (
@@ -203,10 +160,6 @@ export default function TourGuideDetail() {
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-3xl font-bold text-blue-600">{formatPrice(guide.pricePerHour)}</div>
-                      <div className="text-sm text-gray-500">per hour</div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -259,7 +212,7 @@ export default function TourGuideDetail() {
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-bold text-gray-900">Hourly Rate</span>
-                    <span className="text-xl font-bold text-blue-600">{formatPrice(guide.pricePerHour)}</span>
+                    <span className="text-xl font-bold text-blue-600">{formatPrice(guide.hourlyFee)}</span>
                   </div>
                 </div>
 

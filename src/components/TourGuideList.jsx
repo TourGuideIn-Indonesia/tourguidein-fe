@@ -198,14 +198,8 @@ export default function TourGuideList() {
                       <p className="text-sm text-gray-500">Price per hour</p>
                       <p className="text-2xl font-bold text-blue-600">{formatPrice(guide.pricePerHour)}</p>
                     </div>
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                      <div>
-                        <p className="text-sm text-gray-500">Price per hour</p>
-                        <p className="text-2xl font-bold text-blue-600">{formatPrice(guide.pricePerHour)}</p>
-                      </div>
-                      <div className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                        View Details
-                      </div>
+                    <div className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                      View Details
                     </div>
                   </div>
                 </div>

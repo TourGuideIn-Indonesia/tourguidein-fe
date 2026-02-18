@@ -57,7 +57,7 @@ function Home() {
 
   const handleSelectLocation = (location) => {
     setSelectedLocation(location)
-    setQuery(location.value)
+    setQuery(location.type === 'city' ? `${location.value}, ${location.country}` : location.value)
     setShowDropdown(false)
     setResults([])
   }
@@ -143,7 +143,9 @@ function Home() {
                       ) : (
                         <Building2 className="w-4 h-4 text-green-500 shrink-0" />
                       )}
-                      <span className="text-gray-800">{item.value}</span>
+                      <span className="text-gray-800">
+                        {item.type === 'city' ? `${item.value}, ${item.country}` : item.value}
+                      </span>
                       <span className="ml-auto text-xs text-gray-400 capitalize">{item.type}</span>
                     </li>
                   ))}
@@ -178,16 +180,16 @@ function Home() {
               const IconComponent = service.icon
               const content = (
                 <div className={`p-6 rounded-lg border-2 transition-all duration-200 aspect-square flex flex-col items-center justify-center ${service.available
-                    ? showTourGuideSearch && service.title === 'Tour Guides'
-                      ? 'bg-blue-50 border-blue-500 shadow-lg scale-105'
-                      : 'bg-white border-blue-200 hover:border-blue-400 hover:shadow-lg cursor-pointer'
-                    : 'bg-gray-100 border-gray-200 cursor-not-allowed opacity-75'
+                  ? showTourGuideSearch && service.title === 'Tour Guides'
+                    ? 'bg-blue-50 border-blue-500 shadow-lg scale-105'
+                    : 'bg-white border-blue-200 hover:border-blue-400 hover:shadow-lg cursor-pointer'
+                  : 'bg-gray-100 border-gray-200 cursor-not-allowed opacity-75'
                   } ${showTourGuideSearch && service.title !== 'Tour Guides' ? 'pointer-events-none' : ''}`}>
                   <IconComponent className={`w-8 h-8 mb-3 ${service.available
-                      ? showTourGuideSearch && service.title === 'Tour Guides'
-                        ? 'text-blue-700'
-                        : 'text-blue-600'
-                      : 'text-gray-400'
+                    ? showTourGuideSearch && service.title === 'Tour Guides'
+                      ? 'text-blue-700'
+                      : 'text-blue-600'
+                    : 'text-gray-400'
                     }`} />
                   <h3 className={`text-sm font-medium text-center ${showTourGuideSearch && service.title === 'Tour Guides' ? 'text-blue-900' : 'text-gray-900'}`}>
                     {service.title}

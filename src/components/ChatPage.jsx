@@ -16,6 +16,7 @@ export default function ChatPage() {
   const bottomRef = useRef(null);
   const unsubscribeRef = useRef(null);
 
+  const [participants, setParticipants] = useState({});
   useEffect(() => {
     initChat();
 
@@ -42,10 +43,29 @@ export default function ChatPage() {
         order_id: orderId,
       });
 
+      console.log("INIT CHAT RESPONSE:", res.data);
+
       const { firebase_custom_token } = res.data;
 
       await firebaseSignIn(auth, firebase_custom_token);
+      console.log("FIREBASE CURRENT USER:", auth.currentUser);
+      console.log("FIREBASE UID:", auth.currentUser?.uid);
+      // 🔥 ambil participants
+      const p = await axiosPrivate.get(
+        `/api/chat/participants/${orderId}`
+      );
+      console.log("PARTICIPANTS API:", p.data);
+      const raw = p.data.participants;
 
+      // bikin lookup by user_id
+      const normalized = {};
+
+      Object.values(raw).forEach((u) => {
+        normalized[String(u.id)] = u;
+      });
+
+      console.log("NORMALIZED PARTICIPANTS:", normalized);
+      setParticipants(normalized);
       listenMessages();
     } catch (err) {
       console.error(err);
@@ -67,6 +87,8 @@ export default function ChatPage() {
         id: doc.id,
         ...doc.data(),
       }));
+
+      console.log("MESSAGES FROM FIRESTORE:", list);
 
       setMessages(list);
       setLoading(false);
@@ -110,6 +132,30 @@ export default function ChatPage() {
     }
   };
 
+  const formatTime = (timestamp) => {
+    if (!timestamp) return "";
+    const date = new Date(timestamp * 1000); // firestore timestamp (seconds)
+    return date.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getSender = (senderId) => {
+    // kalau message dari aku
+    if (senderId === auth.currentUser.uid) {
+      return {
+        name: "You",
+        avatar:
+          auth.currentUser.photoURL ||
+          "https://ui-avatars.com/api/?name=Me",
+      };
+    }
+  
+    // kalau dari lawan
+    return participants[senderId];
+  };
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -129,31 +175,79 @@ export default function ChatPage() {
       {/* MESSAGES */}
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
         {messages.map((msg) => {
+          console.log("MESSAGE:", msg);
+          console.log("SENDER ID:", msg.sender_id);
+          console.log("AUTH UID:", auth.currentUser?.uid);
           const isMe = msg.sender_id === auth.currentUser.uid;
+          const sender = getSender(msg.sender_id);
+          console.log("SENDER DATA:", sender);
 
           return (
             <div
               key={msg.id}
-              className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+              className={`flex items-end gap-2 ${isMe ? "justify-end" : "justify-start"
+                }`}
             >
-              <div
-                className={`max-w-xs px-3 py-2 rounded-2xl text-sm break-words
-                  ${
-                    isMe
+              {/* AVATAR (left only) */}
+              {!isMe && (
+                <img
+                  src={
+                    sender?.avatar ||
+                    "https://ui-avatars.com/api/?name=" +
+                    encodeURIComponent(sender?.name || "User")
+                  }
+                  alt="avatar"
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              )}
+
+              <div className="max-w-xs">
+                {/* NAME */}
+                {!isMe && (
+                  <p className="text-xs text-gray-500 mb-1">
+                    {sender?.name}
+                  </p>
+                )}
+
+                {/* BUBBLE */}
+                <div
+                  className={`px-3 py-2 rounded-2xl text-sm break-words
+            ${isMe
                       ? "bg-blue-600 text-white rounded-br-none"
                       : "bg-white text-gray-800 rounded-bl-none shadow"
-                  }`}
-              >
-                {msg.type === "image" ? (
-                  <img
-                    src={msg.image_url}
-                    alt="chat"
-                    className="rounded-xl max-w-xs"
-                  />
-                ) : (
-                  msg.text
-                )}
+                    }`}
+                >
+                  {msg.type === "image" ? (
+                    <img
+                      src={msg.image_url}
+                      alt="chat"
+                      className="rounded-xl max-w-xs"
+                    />
+                  ) : (
+                    msg.text
+                  )}
+                </div>
+
+                {/* TIME */}
+                <p
+                  className={`text-[10px] mt-1 ${isMe ? "text-right text-gray-300" : "text-gray-400"
+                    }`}
+                >
+                  {formatTime(msg.created_at?.seconds)}
+                </p>
               </div>
+
+              {/* AVATAR (right only) */}
+              {isMe && (
+                <img
+                  src={
+                    participants[auth.currentUser.uid]?.avatar ||
+                    "https://ui-avatars.com/api/?name=Me"
+                  }
+                  alt="avatar"
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              )}
             </div>
           );
         })}

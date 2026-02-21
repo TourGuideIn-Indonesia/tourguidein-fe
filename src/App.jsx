@@ -12,6 +12,7 @@ import TourGuideDetail from './components/TourGuideDetail'
 import CheckAvailability from './components/CheckAvailability'
 import Checkout from './components/Checkout'
 import ChatPage from './components/ChatPage';
+import ExtraOrderDetail  from './components/ExtraOrderDetail ';
 import { useEffect } from 'react';
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/bookings" element={<Bookings />} />
           <Route path="/bookings/:id" element={<BookingDetail />} />
+          <Route path="/bookings/extras/:id" element={<ExtraOrderDetail  />} />
           <Route path="/guides" element={<TourGuideList />} />
           <Route path="/guides/:id" element={<TourGuideDetail />} />
           <Route path="/guides/:id/availability" element={<CheckAvailability />} />

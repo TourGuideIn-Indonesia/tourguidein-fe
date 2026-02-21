@@ -8,7 +8,11 @@ function BookingDetail() {
   const navigate = useNavigate();
   const [booking, setBooking] = useState(null);
   const [activeTab, setActiveTab] = useState("payment");
-
+  const [reviewForm, setReviewForm] = useState({
+    stars: 5,
+    review_text: "",
+  });
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   useEffect(() => {
     const fetchBooking = async () => {
       try {
@@ -48,13 +52,12 @@ function BookingDetail() {
 
     if (orderStatus === "accepted") return 1;
 
-    if (transactionStatus === "settlement") return 2;
+    if (orderStatus !== "completed" && transactionStatus === "settlement") return 2;
 
     if (orderStatus === "on_going") return 3;
 
-    if (orderStatus === "completed" && booking.reviews.length === 0) return 4;
-
-    if (booking.reviews.length > 0) return 5;
+    if (orderStatus === "completed" && booking.is_traveller_complete == false) return 4;
+    if (booking.is_traveller_complete == true) return 5;
 
     return 0;
   };
@@ -133,6 +136,37 @@ function BookingDetail() {
     }
   };
 
+  const handleSubmitReview = async () => {
+    if (!reviewForm.stars) {
+      alert("Rating wajib diisi");
+      return;
+    }
+
+    setIsSubmittingReview(true);
+
+    try {
+      await axiosPrivate.post("/api/post-reviews", {
+        object_id: booking.id,
+        object_type: "App\\Models\\Order", // SESUAI BACKEND
+        stars: reviewForm.stars,
+        review_text: reviewForm.review_text,
+      });
+
+      alert("Review berhasil dikirim");
+
+      // refresh booking biar step jadi "Review Given"
+      const res = await axiosPrivate.get(`/api/booking/${id}`);
+      setBooking(res.data.data);
+
+      setActiveTab("detail");
+    } catch (err) {
+      console.error(err);
+      alert("Gagal mengirim review");
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-10">
       <div className="max-w-5xl mx-auto space-y-8">
@@ -199,32 +233,30 @@ function BookingDetail() {
         </div>
 
         {/* ===== Chat Button ===== */}
-        {booking.status.order_status !== "completed" && (
-          <div className="flex justify-end gap-3">
-            {/* Chat */}
-            <button
-              onClick={() => navigate(`/chat/${booking.id}`)}
-              className="bg-black text-white px-6 py-3 rounded-xl hover:opacity-90"
-            >
-              Chat Say Hi!
-            </button>
+        <div className="flex justify-end gap-3">
+          {/* Chat */}
+          <button
+            onClick={() => navigate(`/chat/${booking.id}`)}
+            className="bg-black text-white px-6 py-3 rounded-xl hover:opacity-90"
+          >
+            Chat Say Hi!
+          </button>
 
-            {/* Complete Order */}
-            {booking.status.order_status === "on_going" && (
-              <button
-                onClick={handleCompleteOrder}
-                className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700"
-              >
-                Selesaikan Order
-              </button>
-            )}
-          </div>
-        )}
+          {/* Complete Order */}
+          {booking.status.order_status === "completed" && (
+            <button
+              onClick={handleCompleteOrder}
+              className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700"
+            >
+              Selesaikan Order
+            </button>
+          )}
+        </div>
 
         {/* ===== Tabs ===== */}
         <div className="bg-white p-6 rounded-2xl shadow">
           <div className="flex gap-6 border-b pb-4 mb-6">
-            {["payment", "detail", "extra"].map((tab) => (
+            {["payment", "detail", "extra", "review"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -333,6 +365,59 @@ function BookingDetail() {
                   </p>
                 </div>
               ))}
+            </div>
+          )}
+
+          {activeTab === "review" && (
+            <div className="space-y-6 max-w-md">
+
+              {/* Rating */}
+              <div>
+                <p className="font-semibold mb-2">Rating</p>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() =>
+                        setReviewForm({ ...reviewForm, stars: star })
+                      }
+                      className={`w-10 h-10 rounded-full border
+              ${reviewForm.stars >= star
+                          ? "bg-yellow-400 border-yellow-400"
+                          : "bg-white"
+                        }`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Comment */}
+              <div>
+                <p className="font-semibold mb-2">Comment (optional)</p>
+                <textarea
+                  rows={4}
+                  value={reviewForm.review_text}
+                  onChange={(e) =>
+                    setReviewForm({
+                      ...reviewForm,
+                      review_text: e.target.value,
+                    })
+                  }
+                  className="w-full border rounded-lg p-3"
+                  placeholder="Share your experience..."
+                />
+              </div>
+
+              {/* Submit */}
+              <button
+                onClick={handleSubmitReview}
+                disabled={isSubmittingReview}
+                className="bg-black text-white px-6 py-3 rounded-xl disabled:opacity-50"
+              >
+                {isSubmittingReview ? "Submitting..." : "Submit Review"}
+              </button>
             </div>
           )}
         </div>

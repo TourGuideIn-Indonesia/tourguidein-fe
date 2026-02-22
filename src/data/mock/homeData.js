@@ -482,3 +482,56 @@ export const reviews = [
     text: '"First time using TourGuideIn and I was so impressed. The guide spoke fluent English and was very knowledgeable."',
   },
 ];
+
+export const searchResultsMock = [
+  {
+    id: "g1",
+    countryName: "Jerman",
+    flagUrl: "https://flagcdn.com/w20/de.png",
+    cities: [
+      { id: "c1", name: "Frankfurt", guideCount: 1 },
+      { id: "c2", name: "Berlin", guideCount: 1 },
+      { id: "c3", name: "Hamburg", guideCount: 1 },
+    ],
+  },
+  {
+    id: "g2",
+    countryName: "Jepang",
+    flagUrl: "https://flagcdn.com/w20/jp.png",
+    cities: [
+      { id: "c4", name: "Tokyo", guideCount: 5 },
+      { id: "c5", name: "Osaka", guideCount: 3 },
+      { id: "c6", name: "Kyoto", guideCount: 2 },
+    ],
+  },
+  {
+    id: "g3",
+    countryName: "Inggris Raya",
+    flagUrl: "https://flagcdn.com/w20/gb.png",
+    cities: [
+      { id: "c7", name: "London", guideCount: 4 },
+      { id: "c8", name: "Edinburgh", guideCount: 2 },
+      { id: "c9", name: "Manchester", guideCount: 1 },
+    ],
+  },
+  {
+    id: "g4",
+    countryName: "Prancis",
+    flagUrl: "https://flagcdn.com/w20/fr.png",
+    cities: [
+      { id: "c10", name: "Paris", guideCount: 6 },
+      { id: "c11", name: "Lyon", guideCount: 1 },
+      { id: "c12", name: "Marseille", guideCount: 1 },
+    ],
+  },
+  {
+    id: "g5",
+    countryName: "Belanda",
+    flagUrl: "https://flagcdn.com/w20/nl.png",
+    cities: [
+      { id: "c13", name: "Amsterdam", guideCount: 3 },
+      { id: "c14", name: "Rotterdam", guideCount: 2 },
+      { id: "c15", name: "Utrecht", guideCount: 1 },
+    ],
+  },
+];

@@ -1,17 +1,37 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search } from "lucide-react";
+import LocationSearchModal from "./LocationSearchModal";
+import DesktopLocationDropdown from "./DesktopLocationDropdown";
 
 function CategoryGrid({ categories }) {
   const [activeCategory, setActiveCategory] = useState("Tour Guide");
   const [isSearchMobileVisible, setIsSearchMobileVisible] = useState(false);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState("");
+
+  const [isDesktopDropdownOpen, setIsDesktopDropdownOpen] = useState(false);
+  const desktopSearchRef = useRef(null);
+
+  // Close desktop dropdown if clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        desktopSearchRef.current &&
+        !desktopSearchRef.current.contains(event.target)
+      ) {
+        setIsDesktopDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <>
       {/* Mobile View */}
       <div className="md:hidden">
         {isSearchMobileVisible ? (
-          // Mobile Hero + Search Form (Visible when category is clicked)
           <div className="relative w-full bg-white mb-5 animate-in fade-in duration-300">
             <div className="w-full h-[250px] relative">
               <img
@@ -39,8 +59,11 @@ function CategoryGrid({ categories }) {
                   </div>
                   <input
                     type="text"
+                    readOnly
+                    value={selectedLocation}
+                    onClick={() => setIsLocationModalOpen(true)}
                     placeholder={`Mau ke mana dengan ${activeCategory}?`}
-                    className="w-full pl-11 pr-4 py-3.5 bg-white border border-gray-200 rounded-xl text-[14px] text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#4a72d5] focus:ring-1 focus:ring-[#4a72d5] shadow-sm"
+                    className="w-full pl-11 pr-4 py-3.5 bg-white border border-gray-200 rounded-xl text-[14px] text-gray-900 focus:outline-none focus:border-[#4a72d5] focus:ring-1 focus:ring-[#4a72d5] shadow-sm cursor-text placeholder-gray-400"
                   />
                 </div>
 
@@ -134,16 +157,36 @@ function CategoryGrid({ categories }) {
             <label className="block text-[13px] font-medium text-gray-600 mb-2">
               Mau pergi ke negara?
             </label>
-            <div className="flex gap-4">
-              <div className="relative flex-1">
+            <div className="flex gap-4 relative">
+              <div className="relative flex-1" ref={desktopSearchRef}>
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Search className="w-5 h-5 text-gray-400" />
                 </div>
                 <input
                   type="text"
+                  value={selectedLocation}
+                  onChange={(e) => {
+                    setSelectedLocation(e.target.value);
+                    if (!isDesktopDropdownOpen) setIsDesktopDropdownOpen(true);
+                  }}
+                  onFocus={() => setIsDesktopDropdownOpen(true)}
                   placeholder="Mau pergi ke negara?"
-                  className="w-full pl-11 pr-4 py-3.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-800 placeholder-gray-400"
+                  className={`w-full pl-11 pr-4 py-3.5 border rounded-xl text-[14px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4a72d5] transition-shadow shadow-sm cursor-text ${
+                    isDesktopDropdownOpen
+                      ? "border-[#4a72d5]"
+                      : "border-gray-200 focus:border-[#4a72d5]"
+                  }`}
                 />
+                {/* Desktop Dropdown */}
+                {isDesktopDropdownOpen && (
+                  <DesktopLocationDropdown
+                    searchQuery={selectedLocation}
+                    onSelect={(location) => {
+                      setSelectedLocation(location);
+                      setIsDesktopDropdownOpen(false);
+                    }}
+                  />
+                )}
               </div>
               <button className="bg-[#4a72d5] hover:bg-blue-700 text-white font-semibold text-sm px-8 py-3.5 rounded-lg transition-colors whitespace-nowrap">
                 Cari Tour Guide
@@ -152,6 +195,16 @@ function CategoryGrid({ categories }) {
           </div>
         </div>
       </div>
+
+      {/* Location Search Modal Full Screen */}
+      <LocationSearchModal
+        isOpen={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+        onSelect={(location) => {
+          setSelectedLocation(location);
+          setIsLocationModalOpen(false);
+        }}
+      />
     </>
   );
 }

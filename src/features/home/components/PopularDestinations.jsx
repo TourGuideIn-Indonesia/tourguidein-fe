@@ -1,4 +1,4 @@
-function PopularDestinations({ destinations }) {
+function PopularDestinations({ destinations, onDestinationClick }) {
   return (
     <section className="mb-7">
       <div className="px-5 md:px-10 mb-3.5">
@@ -10,7 +10,11 @@ function PopularDestinations({ destinations }) {
       {/* Mobile: 3-col grid */}
       <div className="grid grid-cols-3 gap-2.5 px-5 md:hidden">
         {destinations.slice(0, 6).map((dest) => (
-          <div key={dest.id} className="cursor-pointer group">
+          <div
+            key={dest.id}
+            className="cursor-pointer group"
+            onClick={() => onDestinationClick?.(dest.name)}
+          >
             <div className="overflow-hidden rounded-lg mb-1.5">
               <img
                 src={dest.image}
@@ -28,7 +32,11 @@ function PopularDestinations({ destinations }) {
 
       <div className="hidden md:flex overflow-x-auto px-10 pb-5 gap-4 scrollbar-hide">
         {destinations.map((dest) => (
-          <div key={dest.id} className="shrink-0 cursor-pointer group">
+          <div
+            key={dest.id}
+            className="shrink-0 cursor-pointer group"
+            onClick={() => onDestinationClick?.(dest.name)}
+          >
             <div className="w-[190px] h-[190px] overflow-hidden rounded-lg mb-1.5">
               <img
                 src={dest.image}

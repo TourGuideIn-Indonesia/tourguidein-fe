@@ -15,7 +15,7 @@ function DesktopNavbar() {
 
   return (
     <nav className="hidden md:block bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div className="px-6 lg:px-10">
+      <div className="max-w-[1440px] mx-auto px-6 lg:px-10">
         <div className="flex items-center justify-between h-16">
           {/* Left: Logo + Nav Links */}
           <div className="flex items-center gap-10">
